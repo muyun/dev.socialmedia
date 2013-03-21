@@ -1,4 +1,4 @@
 dev.datamining
 ==============
 
-code about data mining and machine learning
+Homework for social media in CUHK
