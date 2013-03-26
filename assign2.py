@@ -76,7 +76,7 @@ def getStopWordList(file):
 #start mapWordsToIDs
 def mapWordsToIDs(sentences):
     dict = {}      
-    #dict wordDict is a global variable
+
     for i, word in enumerate(sentences):
         dict[word] = i+1
        
@@ -415,14 +415,14 @@ if __name__ == "__main__":
     trainingData = "training_exp1_f1.dat"
     testingData  = "testing_exp1_f1.dat"
     model = "model_exp1_f2"
-    
+    '''
     svm_learn = "/home/zhaowenlong/workspace/lib/svm_light/svm_learn"
     svm_classify = "/home/zhaowenlong/workspace/lib/svm_light/svm_classify"
 
     import commands
     commands.getstatusoutput("svm_learn targetDir+trainingData targetDir+model_exp1_f2") 
     commands.getstatusoutput("svm_classify targetDir+testingData targetDir+predictions")
-    
+    '''
     #processing
     #
     #Global variable, used to store the features
