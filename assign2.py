@@ -417,11 +417,11 @@ if __name__ == "__main__":
     
     svm_learn = "/home/zhaowenlong/workspace/lib/svm_light/svm_learn"
     svm_classify = "/home/zhaowenlong/workspace/lib/svm_light/svm_classify"
-
+    '''
     import commands
     commands.getstatusoutput("svm_learn targetDir+trainingData targetDir+model_exp1_f2") 
     commands.getstatusoutput("svm_classify targetDir+testingData targetDir+predictions")
-    
+    '''
     #processing
     #
     #Global variable, used to store the features
