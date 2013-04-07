@@ -76,7 +76,7 @@ def getStopWordList(file):
 #start mapWordsToIDs
 def mapWordsToIDs(sentences):
     dict = {}      
-
+    #dict wordDict is a global variable
     for i, word in enumerate(sentences):
         dict[word] = i+1
        
@@ -323,7 +323,6 @@ def process():
     
     for (words, sentiment) in trainFeatures:
        
-         #according to SVMlight, Features should be in increasing order,so
         dict = {}
         wordsbyValue = []
         if len(words) != 0:    
@@ -341,6 +340,7 @@ def process():
                 #value is in increasing order
                 #in top words modle, dict might be null, so,
             if len(dict) != 0:
+                #according to SVMlight, Features should be in increasing order,so
                 key,value = zip(*[(key,dict[key]) for key in sorted(dict,key=dict.get)])
                 wordsbyValue = list(key)
         
@@ -361,7 +361,6 @@ def process():
             
     for (words, sentiment) in testFeatures:
         
-        #according to SVMlight, Features should be in increasing order,so
         dict = {}
         wordsbyValue = []
         if len(words) != 0:    
@@ -415,14 +414,14 @@ if __name__ == "__main__":
     trainingData = "training_exp1_f1.dat"
     testingData  = "testing_exp1_f1.dat"
     model = "model_exp1_f2"
-    '''
+    
     svm_learn = "/home/zhaowenlong/workspace/lib/svm_light/svm_learn"
     svm_classify = "/home/zhaowenlong/workspace/lib/svm_light/svm_classify"
 
     import commands
     commands.getstatusoutput("svm_learn targetDir+trainingData targetDir+model_exp1_f2") 
     commands.getstatusoutput("svm_classify targetDir+testingData targetDir+predictions")
-    '''
+    
     #processing
     #
     #Global variable, used to store the features
