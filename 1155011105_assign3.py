@@ -35,7 +35,6 @@ def getData():
             #ratings.append(rating)
 
     f.close()        
-    #    print(users)
     print "The ratings Matrix:"
     print(ratings)
 
@@ -80,8 +79,7 @@ def getNoRelatedItems(ratings, u):
         #else:
             #list.append(k)
         i += 1
-    #print nolist
-
+        
     return nolist
 
 def calPearsonr(list1,list2):
@@ -105,13 +103,10 @@ def similarity(ratings,u1, u2):
 
     # get common list
     nolist = getUnion(nolist1, nolist2)
-    #print nolist
     
     # get the u1's list, which only include the common items between u1 and u2
     list1 = [item for index, item in enumerate(ratings[u1]) if index not in nolist]
-    #print list1
     list2 = [item for index, item in enumerate(ratings[u2]) if index not in nolist]
-    #print list2
 
     # calculate pearson correlation
     # meet the function parameters, so bad ...
@@ -136,7 +131,7 @@ def getNeighbors(ratings, u, N, b):
     # len(ratings) is the number of users, because ratings is an array and begin from 0
     # and we use the index of array ratings as user's index
     user = 0
-    while (user < len(ratings)):
+    while user < len(ratings):
         if user != u:
             nolist1 = []
             nolist1 = getNoRelatedItems(ratings, user)
@@ -146,31 +141,29 @@ def getNeighbors(ratings, u, N, b):
             if Set(nolist1).issubset(Set(nolist0)):
                 # get common list
                 nolist = getUnion(nolist1, nolist0)
-                #print "nolist"
-                #print nolist
                 # get the current user's list, which only include the common items between current user and required u
                 list1 = [item for index, item in enumerate(ratings[user]) if index not in nolist]
                 list2 = [item for index, item in enumerate(ratings[u]) if index not in nolist]
 
                 # calculate pearson correlation
                 # meet the function parameters, so bad ...
-                pearsonr = calPearsonr(list1, list2)
+                pearson = calPearsonr(list1, list2)
 
-                similarities.append((pearsonr, user))
+                similarities.append((pearson, user))
                 
         user += 1        
         
     s = sorted(similarities,key = lambda similarities: similarities[0],reverse=True)
 
     similarities = s[:N]
-
+        
     userList = []
     for similarity in similarities:
         userList.append(similarity[1])
-        #print "userid:%d" % similarity[1]
-    print userList          
+            #print "userid:%d" % similarity[1]
             
     return userList  
+    
 
 def predict(ratings, u, b, neighbors):
     #Since the neighbours of u have been given
@@ -192,7 +185,6 @@ def predict(ratings, u, b, neighbors):
     
     for neighbor in neighbors:
         if ratings[neighbor][b] != -1:
-            #print "neighbor: %d" % neighbor
             # also, the neighbor should meet the neighbor's definition
             # which means that the neighbor user should be superset of u
             # that's to say, -1 items should be subset of u's
@@ -222,11 +214,12 @@ def predict(ratings, u, b, neighbors):
                     # calculate pearson correlation
                     pearson = calPearsonr(list1, list2)
                     newPearson.append((pearson,neighbor))
-                    #print "pearson: %f" % pearson
+                    
+                else:
+                    continue
                     
     #only when book b is in the neighbors but not in u
     if len(allList) != 0:                
-        #print newPearson
         # then calculate pearson for each neighbor        
         # similar to k-nearest
         value = 0
@@ -239,22 +232,24 @@ def predict(ratings, u, b, neighbors):
 
         #get the sum
         pearsonSum = sum(sumList)
-        #print "pearsonSum %f" % pearsonSum
         
+        #        print "pearsonSum %f" % pearsonSum
         for fields in newPearson:
             pearson = fields[0]
             user = fields[1]
-            pearsonValue = pearson / pearsonSum
+            if pearsonSum == 0.0:
+                pearsonValue = 1
+            else:
+                pearsonValue = pearson / pearsonSum
            
             value += ratings[user][b] * pearsonValue
             #print "value1: %f" % value
     
-        print "%f" % value
         return value
         
     # or return u's rating
     else:
-        print "%f" % ratings[u][b]
+        #print "%f" % ratings[u][b]
         return ratings[u][b]
           
 if  __name__ == "__main__":
@@ -284,13 +279,152 @@ if  __name__ == "__main__":
     
     #find the neighbors of some user
     N = []
-    item = 5
-    getNeighbors(ratings, 3, 5, item)
+    item = 0
+    getNeighbors(ratings, 0, 5, item)
     
     # predict the rating that some user would give to a book
     # list neighbors is a list of indices of the nighbors of user u
     neighbors = [4,5,6,7,8,9]
     predict(ratings, 3, 4, neighbors)
-
+  
     # evaluation
+    print "Perform evaluation:"
+    # get the neighbors
+    #userlist store the list of neighbor when given a user
+    userList05  = []
+    userList010 = []
+    userList15  = []
+    userList110 = []
+
+    # store predicted rating based on the above neighbor
+    predictedRating05 = []
+    predictedRating010 = []
+    predictedRating15 = []
+    predictedRating110 = []
+
+    # remove the first two items list on martix ratings
+    i = 0
+    line = []
+    # store the new ratings
+    newratings = []
+    while i< len(ratings):
+        line = ratings[i]
+        # remove the first two column
+        del line[0:2]
+        newratings.append(line)
+        i += 1
+    
+    i = 0
+    while i<len(newratings):
+        #for book 0, size of neighbor is 5
+        userList05 = getNeighbors(newratings, i, 5, 0)
+        # size of neighbor is 10
+        userList010 = getNeighbors(newratings, i,10, 0)
+        
+        #for book 1, size of neighbor is 5
+        userList15 = getNeighbors(newratings, i, 5, 1)
+        # size of neighbor is 10
+        userList110 = getNeighbors(newratings, i, 10,1)
+        
+        # predict the rating for book 0 based on the above neighbors is 5
+        if len(userList05) != 0:
+            value = predict(newratings, i, 0, userList05)
+
+            predictedRating05.append(value)
+        else:
+            #no neighbor
+            predictedRating05.append(-1)
+
+        # book 0 based on the size of neighbors is 10
+        if len(userList010) != 0:
+            value = predict(newratings, i, 0, userList010)
+            predictedRating010.append(value)
+        else:
+            predictedRating010.append(-1)
+
+        # predict the rating for book 1 based on the above neighbors is 5
+        if len(userList15) != 0:
+            value = predict(newratings, i, 0, userList15)
+            predictedRating15.append(value)
+        else:
+            #no neighbor
+            predictedRating15.append(-1)
+
+        # book 1 based on the size of neighbors is 10
+        if len(userList110) != 0:
+            value = predict(newratings, i, 0, userList110)
+            predictedRating110.append(value)
+        else:
+            predictedRating110.append(-1)
+
+        i += 1
+    
+    # mean rating
+    # for book 0 based on the size of neighbors is 5
+    distance05 = distance010= distance15 = distance110= 0
+    j = 0
+    while j< len(newratings):
+        #for book 0
+        distance05 += abs(newratings[j][0] - predictedRating05[j])
+        distance010 += abs(newratings[j][0] - predictedRating010[j])
+
+        #for book 1
+        distance15 += abs(newratings[j][1] - predictedRating15[j])
+        distance110 += abs(newratings[j][1] - predictedRating110[j])
+
+        j += 1
+
+    # get the value
+    meanValue05 = distance05 / len(newratings)
+    meanValue010 = distance010 / len(newratings)
+    
+    meanValue15 = distance15 / len(newratings)
+    meanValue110 = distance110 / len(newratings)
+
+    print "mean rating of first book with the size of neighborhood is 5: %f" % meanValue05
+    print "mean rating of first book with the size of neighborhood is 10: %f" % meanValue010
+    print "mean rating of second book with the size of neighborhood is 5: %f" % meanValue15
+    print "mean rating of second book with the size of neighborhood is 10: %f" % meanValue110
+
+
+    # RMSE(root mean squared error)
+        # for book 0 based on the size of neighbors is 5
+    distance05 = distance010= distance15 = distance110= 0
+    j = 0
+    while j< len(newratings):
+        #for book 0
+        distance05 += (newratings[j][0] - predictedRating05[j]) ** 2
+        distance010 += (newratings[j][0] - predictedRating010[j]) ** 2
+
+        #for book 1
+        distance15 += (newratings[j][1] - predictedRating15[j]) ** 2
+        distance110 += (newratings[j][1] - predictedRating110[j]) ** 2
+
+        j += 1
+
+    # get the value
+    import math
+    rmseValue05 = math.sqrt(distance05 / len(ratings))
+    rmseValue010 = math.sqrt(distance010 / len(ratings))
+    
+    rmseValue15 = math.sqrt(distance15 / len(ratings))
+    rmseValue110 = math.sqrt(distance110 / len(ratings))
+
+    print "RMSE rating of first book with the size of neighborhood is 5: %f" % rmseValue05
+    print "RMSE rating of first book with the size of neighborhood is 10: %f" % rmseValue010
+    print "RMSE rating of second book with the size of neighborhood is 5: %f" % rmseValue15
+    print "RMSE rating of second book with the size of neighborhood is 10: %f" % rmseValue110
+
+    #the mean and RMSE for the four types of predictions
+'''
+mean rating of first book with the size of neighborhood is 5: 0.000000
+mean rating of first book with the size of neighborhood is 10: 0.000000
+mean rating of second book with the size of neighborhood is 5: 0.525000
+mean rating of second book with the size of neighborhood is 10: 0.525000
+RMSE rating of first book with the size of neighborhood is 5: 0.000000
+RMSE rating of first book with the size of neighborhood is 10: 0.000000
+RMSE rating of second book with the size of neighborhood is 5: 0.977880
+RMSE rating of second book with the size of neighborhood is 10: 0.977880
+'''
+
     
