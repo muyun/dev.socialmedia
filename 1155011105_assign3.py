@@ -51,7 +51,6 @@ def getData():
     f.close()
     
     return ratings
-    # print books
 
 # get the common elements in two list    
 def getUnion(list1, list2):
@@ -87,7 +86,6 @@ def calPearsonr(list1,list2):
     from scipy.stats import pearsonr
     p = pearsonr(list1,list2)[0]
    
-    print "%f" % p
     if str(p) == "nan":
         p = 0.0
     #print "%f" % p
@@ -96,7 +94,7 @@ def calPearsonr(list1,list2):
     
 
 def similarity(ratings,u1, u2):
-    print "Calculate the similarity of given two users based Pearson correlation coefficient:"
+    print "Calculate the similarity of given users [%d,%d] based Pearson correlation coefficient:" % (u1,u2)
     # the two list record the index whose value is -1, means that user hasn't read it
     nolist1 = []
     nolist2 = []
@@ -114,11 +112,12 @@ def similarity(ratings,u1, u2):
         # calculate pearson correlation
         # meet the function parameters, so bad ...
         pearson = calPearsonr(list1, list2)
-        #print "%f" % pearson
+        print "The Pearson correlation: %f" % pearson
         return  pearson
     else:
         pearson = "unknown"
-        print "u1 %d and u2 %d arenot neighbors with each other" % u1 % u2
+        
+        print "[%d,%d] arenot neighbors with each other" % (u1,u2)
 
 def getNeighbors(ratings, u, N, b):
     # neighbors's definition:
@@ -151,19 +150,17 @@ def getNeighbors(ratings, u, N, b):
         user += 1        
         
     s = sorted(similarities,key = lambda similarities: similarities[0],reverse=True)
-    #print s
- 
     similarities = s[:N]
     
     userList = []
     for fields in similarities:
         userList.append(fields[1])
         #print "userid:%d" % fields[1]
-     
-    print userList      
+    print "The neighbors of user %d are:" % u  
+    print userList
+    
     return userList  
  
-
 def predict(ratings, u, b, neighbors):
     #Since the neighbours of u have been given
     #which assumes we have had similar users
@@ -190,19 +187,19 @@ def predict(ratings, u, b, neighbors):
                 continue
             else:
                 newPearson.append([neighbor, pearson])
-                    
-                
+                            
     # then calculate sum of each neighbor's pearson        
     # similar to k-nearest
     
     #predicted rating
     value = 0.0
+    
     #sum of pearson
     pearsonSum = 0.0
 
     userList = []
     sumList = []
-    print newPearson
+
     for fields in newPearson:
         # prepare for getting the number of neighbor
         # here we can't use len(neighbor) as the number of neighbor,
@@ -224,11 +221,11 @@ def predict(ratings, u, b, neighbors):
             pearsonValue = pearson / pearsonSum
            
         value += ratings[user][b] * pearsonValue
-        
-    print "value1: %f" % value
+
+    print "The predicted value is: %f" % value
     
     return value
-        
+
           
 if  __name__ == "__main__":
     #Global variable
@@ -251,22 +248,24 @@ if  __name__ == "__main__":
     #get the matrix 
     ratings = getData()
     
-    # test the functions
+    #****************************************************************
+    # test the functions ...
     #calculate the correlation
     similarity(ratings,2,4)
     
     #find the neighbors of some user
     N = []
     item = 0
-    getNeighbors(ratings, 0, 2, 2)
+    getNeighbors(ratings, 0, 5, 2)
     
     # predict the rating that some user would give to a book
     # list neighbors is a list of indices of the nighbors of user u
-    neighbors = [4,5,1]
+    neighbors = [3,5,1]
     predict(ratings, 0, 2, neighbors)
     
     #****************************************************************
-    # evaluation
+    # evaluation permormance
+    print "*******************************************"
     print "Perform evaluation:"
     # mean rating
     # make use of other than user himslef 
@@ -290,10 +289,12 @@ if  __name__ == "__main__":
                 b1 += ratings[i][1]
                 
             i += 1
-        meanRating.append([b0,b1,user])
+        meanb0 = b0 / (len(ratings) -1)
+        meanb1 = b1 / (len(ratings) -1)
+        meanRating.append([meanb0,meanb1,user])
         
         user += 1
-    print "meanRating:"
+    print "The mean Rating of the books is:"
     print meanRating
     #predicted rating using predict function 
     # get the new ratings matrix newratings
@@ -372,12 +373,12 @@ if  __name__ == "__main__":
     meanDist0 = meanDist1 = 0.0
     # [b0,b1,user]
     for fields in meanRating:
-        b0 = fields[0]
-        b1 = fields[1]
+        meanb0 = fields[0]
+        meanb1 = fields[1]
         user = fields[2]
 
-        meanDist0 += (ratings[user][0] - b0) ** 2
-        meanDist1 += (ratings[user][1] - b1) ** 2
+        meanDist0 += (ratings[user][0] - meanb0) ** 2
+        meanDist1 += (ratings[user][1] - meanb1) ** 2
  
      #for predictd function   
     # for book 0 based on the size of neighbors is 5
@@ -427,12 +428,15 @@ if  __name__ == "__main__":
     print "RMSE rating of second book with the size of neighborhood is 5: %f" % rmseValue15
     print "RMSE rating of second book with the size of neighborhood is 10: %f" % rmseValue110
 
-    #the mean and RMSE for the four types of predictions
+    
+#The results:
+#RMSE for the three types of predictions for each book
 '''
-RMSE rating of first book with mean rating: 19.241617
-RMSE rating of second book with mean rating: 51.362143
+RMSE rating of first book with mean rating: 0.794805
+RMSE rating of second book with mean rating: 0.497917
 RMSE rating of first book with the size of neighborhood is 5: 1.457574
 RMSE rating of first book with the size of neighborhood is 10: 3.990158
 RMSE rating of second book with the size of neighborhood is 5: 1.289845
 RMSE rating of second book with the size of neighborhood is 10: 3.829169
+>>> 
 '''
