@@ -1,4 +1,4 @@
-dev.datamining
+dev.socialmedia
 ==============
 
-Homework for social media in CUHK
+The homework for social media in CUHK
