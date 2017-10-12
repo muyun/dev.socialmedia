@@ -1,4 +1,4 @@
 dev.socialmedia
 ==============
 
-The homework for social media in CUHK
+A recommender system using the user-based collaborative filtering
