@@ -1,6 +1,5 @@
 # -*- coding ntf-8 -*-
 # ***************************************************************************************
-# This is the homework3 for social media in cuhk
 # which is about a simple recommender system using the user-based collaborative filtering
 # Todo: using class is better
 # ***************************************************************************************
